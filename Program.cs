@@ -1,112 +1,195 @@
-﻿class Program
-//Falta de llaves en la clase y método principal
+﻿using System;
+
+Console.WriteLine("BIBLIOTECA SOLIDARISTA");
+Console.WriteLine("Este sistema ayuda a gestionar el préstamo de libros para los asociados.");
+Console.WriteLine("Permite llevar un control del catálogo y registrar los prestamos.");
+Console.WriteLine("Mantiene un registro del estado de cada prestamo y su duracion.");
+Console.WriteLine("Facilita el seguimiento de material bibliográfico de la asociación.");
+
+//Array-vector de libros variable global
+string[] libros = new string[8] {
+    "Cien años de soledad",
+    "El principito",
+    "Don Quijote",
+    "La Odisea",
+    "Narnia",
+    "Titanic",
+    "Paco y lola",
+    "Unica mirando al mar"
+};
+
+// Matriz para los prestamos 20 filas y 3 columnas (libro, dias, estado)
+int[,] prestamos = new int[20, 3];
+int contadorPrestamos = 0;
+
+string seguir = "s";
+
+while (seguir == "s")
 {
-    static void Main()
+    //Menu
+    Console.WriteLine("Bienvenidos");
+    Console.WriteLine("1. Ver lista de libros");
+    Console.WriteLine("2. Solicitar libro");
+    Console.WriteLine("3. Ver prestamos");
+    Console.WriteLine("4. Entregar libro");
+    Console.WriteLine("5. Salir");
+
+    Console.Write("\nSeleccione una opción: ");
+    int opcion = int.Parse(Console.ReadLine());
+
+    switch (opcion)
     {
-        string[] catalogo = { "A", "B", "C", "D", "E" }; //Hay caracteres invalidos como h, y y falta el cierre correcto de las llaves {}
-        double[] precios = { 10.0, 15.0, 20.0, 25.0, 30.0 };
-        int[,] registros = new int[50, 3];
-        int contador = 0;
-        int opcion = 0;
+        case 1:
+            verlibros();
+            break;
+        case 2:
+            solicitarlibro();
+            break;
+        case 3:
+            verprestamos();
+            break;
+        case 4:
+            entregarlibro();
+            break;
+        case 5:
+            seguir = "n";
+            break;
+        default:
+            Console.WriteLine("Opción no válida");
+            break;
+    }
+}
 
-        do
-        {
-            Console.WriteLine("\n1. Registrar evento");
-            Console.WriteLine("2. Mostrar registros");
-            Console.WriteLine("3. Finalizar evento");
-            Console.WriteLine("4. Salir \n");
-            opcion = Convert.ToInt32(Console.ReadLine());
+mostrarResumen(contadorPrestamos);
 
-            switch (opcion)
-            {
-                // Se pasa contador por referencia
-                case 1: RegistrarEvento(registros, catalogo, precios, ref contador); break;
-                case 2: MostrarRegistros(registros, catalogo, contador); break;
-                case 3: FinalizarEvento(registros, catalogo, contador); break;
-            }
-        } while (opcion != 4);
+// Funciones del sistema
+void verlibros()
+{
+
+    Console.WriteLine("LIBROS DISPONIBLES:");
+    for (int i = 0; i < libros.Length; i++)
+    {
+        Console.WriteLine($"{i}. {libros[i]}");
+    }
+}
+
+void solicitarlibro()
+{
+
+    if (contadorPrestamos >= 20)
+    {
+
+        Console.WriteLine("\nha excedido el máximo");
+        return;
     }
 
-    // Se agrega ref para contador
-    static void RegistrarEvento(int[,] matriz, string[] catalogo, double[] precios, ref int contador)
+    verlibros();
+
+    Console.Write("\nIngrese el número del libro: ");
+    int indiceLibro = int.Parse(Console.ReadLine());
+
+    if (indiceLibro >= 0 && indiceLibro < libros.Length)
     {
-        String codigo;
-        Console.Write("Ingrese código (ej): A, B, C , D ó E ): ");
-        codigo = Console.ReadLine();
 
-        int pos = -1;
+        Console.Write("Ingrese la cantidad de dias del prestamo: ");
+        int dias = int.Parse(Console.ReadLine());
 
-        //Se cambió <= por < para evitar fuera de rango
-        for (int i = 0; i < catalogo.Length; i++) // Error 1
+        prestamos[contadorPrestamos, 0] = indiceLibro;
+        prestamos[contadorPrestamos, 1] = dias;
+        prestamos[contadorPrestamos, 2] = 1;
+        contadorPrestamos++;
+
+        Console.WriteLine("exito.");
+
+    }
+    else
+    {
+        Console.WriteLine("seleccione uno correcto");
+    }
+}
+
+void verprestamos()
+{
+    Console.WriteLine("\nREGISTRO DE PRESTAMOS:");
+    Console.WriteLine("ID    LIBRO     DIAS       ESTADO");
+
+    for (int i = 0; i < contadorPrestamos; i++)
+    {
+
+        string estado;
+
+        if (prestamos[i, 2] == 0)
         {
-            if (catalogo[i] == codigo)
-                pos = i;
+
+            estado = "Cancelado";
         }
-        if (pos == -1)
-            Console.WriteLine("Código no encontrado");
+        else if (prestamos[i, 2] == 1)
+        {
+            estado = "Activo";
+
+        }
         else
         {
-            Console.Write("Cantidad: ");
-            double cantidad = Convert.ToDouble(Console.ReadLine());
-            matriz[contador, 0] = pos;
-            matriz[contador, 1] = (int)cantidad;
-            matriz[contador, 2] = 1;
-            contador++;
+            estado = "Finalizado";
         }
-    }
 
-    static void MostrarRegistros(int[,] matriz, string[] catalogo, int contador)
+        Console.WriteLine("ID: " + i + " - Libro: " + libros[prestamos[i, 0]] + " - Días: " + prestamos[i, 1] + " - Estado: " + estado);
+    }
+}
+
+void entregarlibro()
+{
+
+    verlibros();
+    Console.Write("\nIngrese el numero del prestamo a modificar: ");
+    int numero = int.Parse(Console.ReadLine());
+
+    if (numero >= 0 && numero < contadorPrestamos)
     {
-        for (int i = 0; i < contador; i++)
+        Console.WriteLine("Estados disponibles:");
+        Console.WriteLine("0 - Cancelado");
+        Console.WriteLine("1 - Activo");
+        Console.WriteLine("2 - Finalizado");
+        Console.Write("Ingrese el nuevo estado: ");
+        int nuevoEstado = int.Parse(Console.ReadLine());
+
+        if (nuevoEstado >= 0 && nuevoEstado <= 2)
         {
-            // Se cambió O mayúscula por 0
-            Console.WriteLine("item: " + catalogo[matriz[i, 0]]);
+
+            prestamos[numero, 2] = nuevoEstado;
+            Console.WriteLine("Estado actualizado correctamente.");
+        }
+        else
+        {
+            Console.WriteLine("Estado no válido.");
         }
     }
-
-
-    //Este codigo se relaciona con la matriz ya que busca el vector catalogo
-    //compara la posición por ejemplo A=0, B=1, C=2, D=3, E=4
-    //y busca en la matriz la posición 0,1,2,3,4
-    //si encuentra la posición y el estado es 1 (activo) lo cambia a finalizado
-    //cambando el valor 1 por 0
-    static void FinalizarEvento(int[,] matriz, string[] catalogo, int contador)
+    else
     {
-        string codigo;
-        int pos = -1;
+        Console.WriteLine("ID de préstamo no válido.");
+    }
+}
 
-        // Validación con ciclo do-while para asegurar que el codigo existe
-        do
+void mostrarResumen(int totalPrestamos)
+{
+    int activos = 0;
+    int cancelados = 0;
+    int finalizados = 0;
+
+    for (int i = 0; i < totalPrestamos; i++)
+    {
+
+        switch (prestamos[i, 2])
         {
-            Console.Write("Ingrese código del evento a finalizar: ");
-            codigo = Console.ReadLine();
-
-            for (int i = 0; i < catalogo.Length; i++)
-            {
-                if (catalogo[i] == codigo)
-                    pos = i;
-            }
-
-            if (pos == -1)
-                Console.WriteLine("Código no encontrado, intente nuevamente.");
-
-        } while (pos == -1);
-
-        bool encontrado = false;
-
-        for (int i = 0; i < contador; i++)
-        {
-            if (matriz[i, 0] == pos && matriz[i, 2] == 1)
-            {
-                matriz[i, 2] = 0;
-                Console.WriteLine("Evento finalizado.");
-                encontrado = true;
-                break;
-            }
+            case 0: cancelados++; break;
+            case 1: activos++; break;
+            case 2: finalizados++; break;
         }
-
-        if (!encontrado)
-            Console.WriteLine("No se encontró un evento activo con ese código. ");
     }
 
+    Console.WriteLine("\nRESUMEN FINAL");
+    Console.WriteLine($"Total de prestamos: {totalPrestamos}");
+    Console.WriteLine($"Prestamos activos: {activos}");
+    Console.WriteLine($"Prestamos cancelados: {cancelados}");
+    Console.WriteLine($"Prestamos finalizados: {finalizados}");
 }
